@@ -82,6 +82,7 @@ function LoginForm() {
             Forgot Password
           </p>
         </Link>
+        
       </label>
       <button
         type="submit"
@@ -89,7 +90,26 @@ function LoginForm() {
       >
         Sign In
       </button>
+
+
+      
+      <div className="mt-6 pt-4 border-t border-richblack-700">
+      <div className="flex justify-center">
+        <Link to="/admin/login">
+          <button 
+            type="button"
+            className="text-sm text-richblack-300 hover:text-yellow-50 transition-colors flex items-center gap-2"
+          >
+            <span>🛡️</span>
+            Administrator Login
+          </button>
+        </Link>
+      </div>
+    </div>
+
+    
     </form>
+    
   )
 }
 

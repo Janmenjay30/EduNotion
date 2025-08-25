@@ -23,6 +23,8 @@ import Cart from "./components/core/Dashboard/Cart/index.jsx";
 import AddCourses from "./components/core/Dashboard/AddCourses/index.jsx";
 import MyCourses from "./components/core/Dashboard/MyCourses.jsx";
 import EditCourse from "./components/core/Dashboard/EditCourse/index.jsx";
+import AdminDashboard from "./components/core/Dashboard/AdminDashBoard/AdminDashboard.jsx";
+import AdminLogin from "./components/core/auth/AdminLogin.jsx";
 
 
 function App() {
@@ -48,6 +50,9 @@ function App() {
             </OpenRoute>} />
 
         <Route path="/dashboard" element={<DashBoard/>} />
+
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
         <Route
           path="forgot-password"

@@ -1,16 +1,16 @@
 import { combineReducers } from "@reduxjs/toolkit";
-import { GiCombinationLock } from "react-icons/gi";
 import authReducer from "../slices/authSlice";
 import profileReducer from "../slices/profileSlice";
-import cartReducer from "../slices/cartSlice"
+import cartReducer from "../slices/cartSlice";
 import courseReducer from "../slices/courseSlice";
+import categoryReducer from "../slices/categorySlice"; 
 
-const rootReducer=combineReducers({
-    auth:authReducer,
-    profile:profileReducer,
-    cart:cartReducer,
-    course:courseReducer,
-    
+const rootReducer = combineReducers({
+    auth: authReducer,
+    profile: profileReducer,
+    cart: cartReducer,
+    course: courseReducer,
+    category: categoryReducer,
 });
 
 export default rootReducer;

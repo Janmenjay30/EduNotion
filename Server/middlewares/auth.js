@@ -3,39 +3,41 @@ require("dotenv").config();
 const User=require("../models/User");
 
 
-// auth
-exports.auth=async (req,res,next)=>{
-    try{
-        // extract token
-        const token= req.cookies.token ||
-        req.body.token || req.header("Authorization").replace("Bearer ","");
+// Fix the auth middleware
+exports.auth = async (req, res, next) => {
+    try {
+        // Extract token - FIX: Add null check for Authorization header
+        const token = req.cookies.token ||
+                     req.body.token || 
+                     (req.header("Authorization") ? req.header("Authorization").replace("Bearer ", "") : null);
 
-        // if token is missing 
-        if(!token){
+        // If token is missing 
+        if (!token) {
             return res.status(401).json({
-                success:false,
-                message:"Token is missing",
-            })
+                success: false,
+                message: "Token is missing",
+            });
         }
-        // verify the token 
-        try{
-            const decode= jwt.verify(token,process.env.JWT_SECRET);
+
+        // Verify the token 
+        try {
+            const decode = jwt.verify(token, process.env.JWT_SECRET);
             console.log(decode);
-            req.user=decode;
-        }catch(err){
+            req.user = decode;
+        } catch (err) {
             return res.status(401).json({
-                success:false,
-                message:'token is invalid'
+                success: false,
+                message: 'Token is invalid'
             });
         }
         next();
-    }catch(error){
-         return res.status(401).json({
-            success:false,
-            message:"something went wrong while validating the token"
-         })
+    } catch (error) {
+        return res.status(401).json({
+            success: false,
+            message: "Something went wrong while validating the token"
+        });
     }
-}
+};
 
 // isstudent
 exports.isStudent= async(req,res,next)=>{
@@ -93,3 +95,47 @@ exports.isAdmin= async(req,res,next)=>{
         })
     }
 }
+
+
+
+// Admin authentication middleware
+exports.adminAuth = async (req, res, next) => {
+    try {
+        // Extract admin token
+        const token = req.cookies.adminToken || 
+                     req.body.token || 
+                     req.header("Authorization")?.replace("Bearer ", "");
+
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: "Admin token is missing"
+            });
+        }
+
+        try {
+            const decode = jwt.verify(token, process.env.JWT_SECRET);
+            
+            // Check if it's an admin token
+            if (decode.accountType !== "Admin" || decode.role !== "admin") {
+                return res.status(403).json({
+                    success: false,
+                    message: "Access denied. Admin privileges required."
+                });
+            }
+
+            req.admin = decode;
+        } catch (err) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid admin token"
+            });
+        }
+        next();
+    } catch (error) {
+        return res.status(401).json({
+            success: false,
+            message: "Something went wrong while validating admin token"
+        });
+    }
+};

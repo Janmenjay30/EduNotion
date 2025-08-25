@@ -1,37 +1,37 @@
-const express = require("express")
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
 
+// Import controllers
 const {
-    signUp,
     login,
+    signUp,
     sendOTP,
     changePassword,
+} = require("../controllers/Auth");
 
+// ADD: Import admin controllers
+const {
+    adminLogin,
+    getPendingInstructors,
+    approveInstructor,
+    rejectInstructor,
+    getAdminStats
+} = require("../controllers/AdminAuth");
 
-}=require("../controllers/Auth");
+// Import middlewares
+const { auth, isStudent, isInstructor, isAdmin, adminAuth } = require("../middlewares/auth");
 
-const { resetPasswordToken,
-    resetPassword,
+// Regular auth routes
+router.post("/login", login);
+router.post("/signup", signUp);
+router.post("/sendotp", sendOTP);
+router.post("/changepassword", auth, changePassword);
 
-}= require("../controllers/ResetPassword");
+// ADD: Admin routes
+router.post("/admin-login", adminLogin);
+router.get("/admin/pending-instructors", adminAuth, getPendingInstructors);
+router.post("/admin/approve-instructor", adminAuth, approveInstructor);
+router.post("/admin/reject-instructor", adminAuth, rejectInstructor);
+router.get("/admin/stats", adminAuth, getAdminStats);
 
-const { auth }= require("../middlewares/auth")
-
-//  Authentication Routes
-
-router.post("/login",login);
-
-router.post("/signUp",signUp);
-
-router.post("/sendotp",sendOTP);
-
-router.post("/changePassword",auth,changePassword);
-
-//  reset Password 
-
-router.post("/reset-password",resetPassword);
-
-router.post("/reset-password-token",resetPasswordToken);
-
-module.exports=router;
-
+module.exports = router;

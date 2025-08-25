@@ -46,6 +46,7 @@ exports.showAllCategories = async (req, res) => {
         success: true,
         data: allCategories,
       });
+      console.log("allcategories : ", allCategories);
     } catch (error) {
       console.error(error); // Log the error for debugging
       return res.status(500).json({

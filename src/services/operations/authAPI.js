@@ -94,24 +94,22 @@ export function login(email, password, navigate) {
         password,
       })
 
-      console.log("LOGIN API RESPONSE............", response)
-
       if (!response.data.success) {
         throw new Error(response.data.message)
       }
 
+      const token = response.data.token
+      const user = response.data.user
+      
+      dispatch(setToken(token))
+      dispatch(setUser({ ...user, image: user.image }))
+      
+      // FIX: Remove JSON.stringify for token
+      localStorage.setItem("token", token)                    // ✅ Fixed - no quotes
+      localStorage.setItem("user", JSON.stringify(user))      // ✅ Keep JSON for user object
+      
+      navigate("/dashboard/my-profile")
       toast.success("Login Successful")
-      dispatch(setToken(response.data.token))
-      const userImage = response.data?.user?.image
-        ? response.data.user.image
-        : `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${response.data.user.firstName}`
-       
-      dispatch(setUser({ ...response.data.user, image: userImage }))
-      // console.log("After setUSer ",response.data.user);
-      localStorage.setItem("token", JSON.stringify(response.data.token));
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-
-      navigate("/dashboard")
     } catch (error) {
       console.log("LOGIN API ERROR............", error)
       toast.error("Login Failed")

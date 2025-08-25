@@ -4,63 +4,80 @@ const {uploadImageToCloudinary}=require("../utils/imageUploader");
 const User=require("../models/User");
 const { findById } = require("../models/section");
 
-exports.updateProfile=async (req,res)=>{
-    try{
-        // get data
-        const {dateOfBirth,about="",contactNumber,gender}=req.body;
-        // get userId
-        const id=req.user.id;
-        // validation
-        if(!gender || !contactNumber || !id){
-            return res.status(400).json({
-                success:false,
-                message:"All fields are required",
+exports.updateProfile = async (req, res) => {
+    try {
+        const { firstName, lastName, dateOfBirth, about, contactNumber, gender } = req.body;
+        const id = req.user.id;
+
+        console.log("🔍 Update Profile Debug:");
+        console.log("User ID:", id);
+        console.log("Request Data:", { firstName, lastName, dateOfBirth, about, contactNumber, gender });
+
+        // Find user and populate profile
+        const userDetails = await User.findById(id).populate("additionalDetails").exec();
+        
+        if (!userDetails) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
             });
         }
-        // find profile 
-        const userDetails= await User.findById(id); 
-        const profileId=userDetails.additionalDetails;
-        const profileDetails=await Profile.findById(profileId);
-        // update profile
-        profileDetails.dateOfBirth=dateOfBirth;
-        profileDetails.about=about;
-        profileDetails.gender=gender;
-        profileDetails.contactNumber=contactNumber;
-        await profileDetails.save();
-      //   const updatedProfile=await Profile.create({
-      //     dateOfBirth:dateOfBirth,
-      //     about:about,
-      //     contactNumber:contactNumber,
-      //     gender:gender,
-      // }) 
-      // await Profile.findByIdAndUpdate(
-      //   {id:profileDetails.id},
-      //   {
-      //       $push:{
-      //           additionalDetails:updatedProfile.id,
-      //       }
-      //   },
-      //   {new:true},
-      // );
 
+        const user = userDetails;
+        let profile = userDetails.additionalDetails;
 
+        console.log("🔍 Profile exists:", profile ? "✅ Yes" : "❌ No");
 
+        // FIX: Create profile if it doesn't exist
+        if (!profile) {
+            console.log("🔧 Creating new profile for user");
+            profile = await Profile.create({
+                gender: null,
+                dateOfBirth: null,
+                about: null,
+                contactNumber: null,
+            });
+            
+            // Link the new profile to user
+            user.additionalDetails = profile._id;
+        }
 
-        // return response
-        return res.status(200).json({
-            success:true,
-            message:"Profile updated successfully ",
-            profileDetails,
-        })
-    }catch(error){
+        // Update user fields
+        if (firstName !== undefined) user.firstName = firstName;
+        if (lastName !== undefined) user.lastName = lastName;
+
+        // Update profile fields safely
+        if (dateOfBirth !== undefined) profile.dateOfBirth = dateOfBirth;
+        if (about !== undefined) profile.about = about;
+        if (contactNumber !== undefined) profile.contactNumber = contactNumber;
+        if (gender !== undefined) profile.gender = gender;
+
+        // Save both documents
+        await user.save();
+        await profile.save();
+
+        // Return updated user with populated profile
+        const updatedUserDetails = await User.findById(id)
+            .populate("additionalDetails")
+            .exec();
+
+        console.log("🔍 Profile updated successfully");
+
+        return res.json({
+            success: true,
+            message: "Profile updated successfully",
+            updatedUserDetails,
+        });
+        
+    } catch (error) {
+        console.error("🔍 Profile update error:", error);
         return res.status(500).json({
-            success:false,
-            message:"unable to update profile ",
-            error:error.message, 
+            success: false,
+            message: "Unable to update profile",
+            error: error.message,
         });
     }
-}
-
+};
 
 // how can we schedule the delete op[ration 
 exports.deleteAccount=async (req,res)=>{
