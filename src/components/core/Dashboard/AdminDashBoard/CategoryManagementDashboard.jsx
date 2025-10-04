@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 import { apiConnector } from "../../../../services/apiConnector";
 import { courseEndpoints } from "../../../../services/apis";

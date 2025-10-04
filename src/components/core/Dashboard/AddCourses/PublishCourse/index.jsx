@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import IconBtn from '../../../../common/IconBtn';
 import { COURSE_STATUS } from '../../../../../utils/constants';
 import { resetCourseState, setStep } from '../../../../../slices/courseSlice';
@@ -13,13 +12,12 @@ export default function PublishCourse() {
   const { course } = useSelector((state) => state.course);
   const { token } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (course?.status === COURSE_STATUS.PUBLISHED) {
       setValue("public", true);
     }
-  }, []);
+  }, [course?.status, setValue]);
 
   const goBack = () => {
     dispatch(setStep(2));
