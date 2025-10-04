@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 import { apiConnector } from "../../../../services/apiConnector";
 import { courseEndpoints } from "../../../../services/apis";
-import { FaPlus, FaEdit, FaTrash, FaEye } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import { MdCategory } from "react-icons/md";
 import ConfirmationModal from "../../../common/ConfirmationModal";
 

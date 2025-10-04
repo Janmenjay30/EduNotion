@@ -14,7 +14,7 @@ function RenderCartCourses() {
   return (
     <div>
       {
-        Cart.map((courses,index)=>{
+        Cart.map((courses,index)=>(
             <div>
                 <div>
                     <img src={courses?.thumbnail} alt="" />
@@ -52,7 +52,7 @@ function RenderCartCourses() {
                     <p>Rs {courses?.price} </p>
                 </div>
             </div>
-        })
+        ))
       }
     </div>
   )
