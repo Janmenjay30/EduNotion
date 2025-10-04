@@ -3,7 +3,7 @@ import React from "react"
 import Footer from "../components/core/HomePage/Footer"
 import ContactDetails from "../components/ContactPage/ContactDetails"
 import ContactUsForm from "../components/ContactPage/ContactUsForm"
-import ContactForm from "../components/ContactPage/ContactForm"
+import ContactForm from "../components/ContactPage/ContactUsForm"
 
 
 const Contact = () => {
