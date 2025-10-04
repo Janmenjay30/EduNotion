@@ -1,6 +1,6 @@
 import "./App.css";
-import {Route,Routes,useNavigate} from "react-router-dom";
-import { useSelector,useDispatch } from "react-redux";
+import {Route,Routes} from "react-router-dom";
+import { useSelector } from "react-redux";
 import Home from "./pages/Home"
 import Navbar from "./components/common/Navbar";
 import Signup from "./pages/Signup";

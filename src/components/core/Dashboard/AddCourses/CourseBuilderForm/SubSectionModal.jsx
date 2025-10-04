@@ -10,7 +10,6 @@ import {
 } from "../../../../../services/operations/courseDetailsAPI"
 import { setCourse } from "../../../../../slices/courseSlice"
 import IconBtn from "../../../../common/IconBtn"
-import Upload from "../Upload"
 
 export default function SubSectionModal({
   modalData,
@@ -42,7 +41,7 @@ export default function SubSectionModal({
       setValue("lectureDesc", modalData.description);
       setValue("lectureVideo", modalData.videoUrl);
     }
-  }, [])
+  }, [view, edit, modalData, setValue])
 
   // detect whether form is updated or not
   const isFormUpdated = () => {

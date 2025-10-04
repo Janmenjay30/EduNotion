@@ -54,7 +54,7 @@ function CourseInformationForm() {
         }
 
         getCategories();
-    },[editCourse,course])
+    },[editCourse,course,setValue])
 
     const isFormUpdated=()=>{
       // if(!course) return false;
