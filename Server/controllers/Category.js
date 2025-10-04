@@ -24,7 +24,7 @@ exports.createCategory=async (req,res)=>{
             description:description,
 
         });
-        console.log(categoryDetails);
+        // console.log(categoryDetails);
 
         return res.status(200).json({
             success:true,
@@ -46,7 +46,7 @@ exports.showAllCategories = async (req, res) => {
         success: true,
         data: allCategories,
       });
-      console.log("allcategories : ", allCategories);
+      // console.log("allcategories : ", allCategories);
     } catch (error) {
       console.error(error); // Log the error for debugging
       return res.status(500).json({
@@ -55,6 +55,82 @@ exports.showAllCategories = async (req, res) => {
       });
     }
   };
+
+// Update category
+exports.updateCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+    const { name, description } = req.body;
+
+    if (!name || !description) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name and description are required',
+      });
+    }
+
+    const updatedCategory = await Category.findByIdAndUpdate(
+      categoryId,
+      { name, description },
+      { new: true }
+    );
+
+    if (!updatedCategory) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Category updated successfully',
+      data: updatedCategory,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Delete category
+exports.deleteCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found',
+      });
+    }
+
+    // Check if category has courses
+    if (category.course && category.course.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete category with existing courses',
+      });
+    }
+
+    await Category.findByIdAndDelete(categoryId);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Category deleted successfully',
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 // category page details 
 exports.categoryPageDetails = async (req, res) => {

@@ -2,9 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 import { apiConnector } from "../../../../services/apiConnector";
+import { courseEndpoints } from "../../../../services/apis";
 import { FaPlus, FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import { MdCategory } from "react-icons/md";
 import ConfirmationModal from "../../../common/ConfirmationModal";
+
+const { 
+  COURSE_CATEGORIES_API, 
+  CREATE_CATEGORY_API, 
+  UPDATE_CATEGORY_API, 
+  DELETE_CATEGORY_API 
+} = courseEndpoints;
 
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
@@ -26,7 +34,10 @@ const CategoryManagement = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await apiConnector("GET", "/api/v1/course/showAllCategories");
+      const token = localStorage.getItem("adminToken");
+      const response = await apiConnector("GET", COURSE_CATEGORIES_API, null, {
+        Authorization: `Bearer ${token}`,
+      });
       console.log("📥 Categories fetched:", response.data);
       
       if (response.data.success) {
@@ -65,9 +76,12 @@ const CategoryManagement = () => {
 
     setLoading(true);
     try {
-      const response = await apiConnector("POST", "/api/v1/course/createCategory", {
+      const token = localStorage.getItem("adminToken");
+      const response = await apiConnector("POST", CREATE_CATEGORY_API, {
         name: formData.name.trim(),
         description: formData.description.trim()
+      }, {
+        Authorization: `Bearer ${token}`,
       });
       
       console.log("📤 Create category response:", response.data);
@@ -98,9 +112,12 @@ const CategoryManagement = () => {
 
     setLoading(true);
     try {
-      const response = await apiConnector("PUT", `/api/v1/course/updateCategory/${editingCategory._id}`, {
+      const token = localStorage.getItem("adminToken");
+      const response = await apiConnector("PUT", `${UPDATE_CATEGORY_API}/${editingCategory._id}`, {
         name: formData.name.trim(),
         description: formData.description.trim()
+      }, {
+        Authorization: `Bearer ${token}`,
       });
       
       if (response.data.success) {
@@ -122,7 +139,10 @@ const CategoryManagement = () => {
   const handleDeleteCategory = async (categoryId) => {
     setLoading(true);
     try {
-      const response = await apiConnector("DELETE", `/api/v1/course/deleteCategory/${categoryId}`);
+      const token = localStorage.getItem("adminToken");
+      const response = await apiConnector("DELETE", `${DELETE_CATEGORY_API}/${categoryId}`, null, {
+        Authorization: `Bearer ${token}`,
+      });
       
       if (response.data.success) {
         toast.success("Category deleted successfully!");
@@ -163,8 +183,7 @@ const CategoryManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-richblack-900 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -329,10 +348,9 @@ const CategoryManagement = () => {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Confirmation Modal */}
-      {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
+        {/* Confirmation Modal */}
+        {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
     </div>
   );
 };

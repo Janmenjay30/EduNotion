@@ -40,6 +40,10 @@ export const profileEndpoints = {
       BASE_URL + "/course/getFullCourseDetails",
     LECTURE_COMPLETION_API: BASE_URL + "/course/updateCourseProgress",
     CREATE_RATING_API: BASE_URL + "/course/createRating",
+    // Admin category endpoints
+    CREATE_CATEGORY_API: BASE_URL + "/course/createCategory",
+    UPDATE_CATEGORY_API: BASE_URL + "/course/updateCategory",
+    DELETE_CATEGORY_API: BASE_URL + "/course/deleteCategory",
   }
   
   // RATINGS AND REVIEWS

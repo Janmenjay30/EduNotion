@@ -3,12 +3,42 @@ const Section = require("../models/section");
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
 exports.createSubSection=async(req,res)=>{
+    console.log("🎬 CreateSubSection API called");
+    console.log("📋 Request Body:", req.body);
+    console.log("📁 Files:", req.files);
+    
     try{
         // fetch data from req body
-        const {sectionId,title,timeDuration,description}=req.body;
-        // extract file/video
-        const video=req.files.video;
-        // console.log(title);
+        const {sectionId,title,description}=req.body;
+        
+        let video;
+        
+        // Check multiple ways the video might be sent
+        if (req.files && req.files.video) {
+            console.log("✅ Video found in req.files.video");
+            video = req.files.video;
+        } else if (req.body.video && typeof req.body.video === 'object') {
+            console.log("⚠️  Video found in req.body.video - this might be incorrect format");
+            console.log("Video object:", req.body.video);
+            return res.status(400).json({
+                success: false,
+                message: "Video file should be uploaded as multipart/form-data, not in request body",
+                debug: "Video was found in req.body instead of req.files"
+            });
+        } else {
+            console.log("❌ No video file found anywhere");
+            return res.status(400).json({
+                success: false,
+                message: "Video file is required for creating subsection",
+                debug: {
+                    hasReqFiles: !!req.files,
+                    hasReqBodyVideo: !!req.body.video,
+                    reqFilesKeys: req.files ? Object.keys(req.files) : [],
+                    reqBodyKeys: Object.keys(req.body)
+                }
+            });
+        }
+        
         // validation
         if(!sectionId || !title  || !description || !video){
             return res.status(400).json({

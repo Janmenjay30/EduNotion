@@ -16,6 +16,8 @@ const {
     
     categoryPageDetails,
     showAllCategories,
+    updateCategory,
+    deleteCategory,
     
 
 }=require("../controllers/Category");
@@ -44,7 +46,7 @@ const {
 
 
 //   middlewares
-const { auth, isInstructor, isStudent, isAdmin } = require("../middlewares/auth");
+const { auth, isInstructor, isStudent, isAdmin, adminAuth } = require("../middlewares/auth");
 
 // routes
 // course routes
@@ -71,9 +73,11 @@ router.delete("/deleteCourse", deleteCourse)
 
 // Category details 
 // category can only be created by admin
-router.post("/createCategory",auth,isAdmin,createCategory);
+router.post("/createCategory", adminAuth, createCategory);
 router.get("/showAllCategories",showAllCategories);
 router.post("/getCategoryPageDetails",categoryPageDetails);
+router.put("/updateCategory/:categoryId", adminAuth, updateCategory);
+router.delete("/deleteCategory/:categoryId", adminAuth, deleteCategory);
 
 // Rating and reviews
 

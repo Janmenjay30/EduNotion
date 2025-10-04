@@ -5,7 +5,21 @@ const {uploadImageToCloudinary}=require("../utils/imageUploader");
 const Category = require("../models/Category");
 const Section=require("../models/section");
 const SubSection = require("../models/subSection");
+const CourseProgress = require("../models/courseProgress");
 
+// Function to convert seconds to duration string
+function convertSecondsToDuration(totalSeconds) {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  let duration = '';
+  if (hours > 0) duration += `${hours}h `;
+  if (minutes > 0) duration += `${minutes}m `;
+  if (seconds > 0) duration += `${seconds}s`;
+
+  return duration.trim();
+}
 
 // craeteCourse handller function
 exports.createCourse=async(req,res)=>{
@@ -19,16 +33,20 @@ exports.createCourse=async(req,res)=>{
         const thumbnail= req.files.thumbnailImage;
 
         // validation
-        if(!courseName || !courseDescription || !whatYouWillLearn || !price || !tag || !thumbnail
+        if(!courseName?.trim() || !courseDescription?.trim() || !whatYouWillLearn?.trim() || !price || !tag || !thumbnail
             || !category)
             {
-            // console.log("coursename ",courseName,"courseDescription ",courseDescription,
-            //     "what you will learn= ",whatYouWillLearn,"price= ",price,"tag= ",tag,"thumbnail= ",thumbnail,"category ",
-            //     category
-            // )
             return res.status(400).json({
                 success:false,
                 message:"All fields are required",
+            });
+        }
+
+        // Validate price
+        if(price <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Course price must be greater than 0",
             });
         }
         if (!status || status === undefined) {
@@ -37,10 +55,11 @@ exports.createCourse=async(req,res)=>{
         // check for instructor
         const userId=req.user.id;
         
-        const instructorDetails=await User.findById(userId,{
-            accountType:"Instructor",
+        const instructorDetails=await User.findOne({
+            _id: userId,
+            accountType: "Instructor",
         });
-        console.log("instructor details: ",instructorDetails);
+        // console.log("instructor details: ",instructorDetails);
         if(!instructorDetails){
             return res.status(404).json({
                 success:false,
@@ -57,11 +76,20 @@ exports.createCourse=async(req,res)=>{
                 message:"category details not found ",
             })
         }
-        console.log("category details: ",categoryDetails);
+        // console.log("category details: ",categoryDetails);
 
         // Upload image to cloudinary
-
-        const thumbnailImage=await uploadImageToCloudinary(thumbnail,process.env.FOLDER_NAME);
+        let thumbnailImage;
+        try {
+            thumbnailImage = await uploadImageToCloudinary(thumbnail, process.env.FOLDER_NAME);
+        } catch (error) {
+            console.log("Error uploading thumbnail:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Failed to upload thumbnail image",
+                error: error.message,
+            });
+        }
         
         // create an entry for new course
         const newCourse=await Course.create({
@@ -122,28 +150,48 @@ exports.createCourse=async(req,res)=>{
 
 // Edit Course Details
 exports.editCourse = async (req, res) => {
-  console.log("EditCourse API is called")
+  console.log("🚀 EditCourse API is called")
   try {
-    console.log("Request Body:", req.body);
-    console.log("Files:", req.files);
+    console.log("📋 Request Body:", req.body);
+    console.log("📁 Files:", req.files);
 
     const { courseId } = req.body;
+    
+    if (!courseId) {
+      console.log("❌ No courseId provided");
+      return res.status(400).json({ 
+        success: false, 
+        error: "Course ID is required" 
+      });
+    }
+
     const updates = req.body;
     const course = await Course.findById(courseId);
 
     if (!course) {
-      return res.status(404).json({ error: "Course not found" });
+      console.log("❌ Course not found for ID:", courseId);
+      return res.status(404).json({ 
+        success: false, 
+        error: "Course not found" 
+      });
     }
+
+    console.log("✅ Course found, processing updates...");
 
     // If Thumbnail Image is found, update it
     if (req.files) {
-      console.log("Thumbnail update");
+      console.log("🖼️ Processing thumbnail update");
       const thumbnail = req.files.thumbnailImage;
-      const thumbnailImage = await uploadImageToCloudinary(
-        thumbnail,
-        process.env.FOLDER_NAME
-      );
-      course.thumbnail = thumbnailImage.secure_url;
+      
+      if (thumbnail) {
+        console.log("📤 Uploading thumbnail to Cloudinary...");
+        const thumbnailImage = await uploadImageToCloudinary(
+          thumbnail,
+          process.env.FOLDER_NAME
+        );
+        course.thumbnail = thumbnailImage.secure_url;
+        console.log("✅ Thumbnail updated successfully");
+      }
     }
 
     // Update only the fields that are present in the request body
@@ -158,6 +206,7 @@ exports.editCourse = async (req, res) => {
     }
 
     await course.save();
+    console.log("💾 Course saved successfully");
 
     const updatedCourse = await Course.findOne({ _id: courseId })
       .populate({
@@ -172,14 +221,15 @@ exports.editCourse = async (req, res) => {
       })
       .exec();
 
-    res.json({
+    console.log("✅ Edit course completed successfully");
+    return res.json({
       success: true,
       message: "Course updated successfully",
       data: updatedCourse,
     });
   } catch (error) {
-    console.error("Error updating course:", error);
-    res.status(500).json({
+    console.error("❌ Error updating course:", error);
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
       error: error.message,
@@ -423,4 +473,3 @@ exports.getCourseDetails = async (req, res) => {
       })
     }
   }
-  

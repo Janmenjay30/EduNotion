@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { apiConnector } from "../../../../services/apiConnector";
+import CategoryManagementDashboard from "./CategoryManagementDashboard";
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({});
     const [pendingInstructors, setPendingInstructors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(null);
+    const [activeTab, setActiveTab] = useState("dashboard"); // New state for tab management
 
     useEffect(() => {
         fetchDashboardData();
@@ -128,6 +130,9 @@ const AdminDashboard = () => {
                         <div>
                             <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
                             <p className="text-richblack-300">Manage StudyNotion Platform</p>
+                            <p className="text-xs text-richblack-400 mt-1">
+                                Last updated: {new Date().toLocaleString()}
+                            </p>
                         </div>
                         <button
                             onClick={logout}
@@ -136,10 +141,36 @@ const AdminDashboard = () => {
                             Logout
                         </button>
                     </div>
+                    
+                    {/* Navigation Tabs */}
+                    <div className="flex space-x-1 -mb-px">
+                        <button
+                            onClick={() => setActiveTab("dashboard")}
+                            className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-colors ${
+                                activeTab === "dashboard"
+                                    ? "bg-richblack-900 text-white border-b-2 border-yellow-50"
+                                    : "text-richblack-300 hover:text-white hover:bg-richblack-700"
+                            }`}
+                        >
+                            📊 Dashboard
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("categories")}
+                            className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-colors ${
+                                activeTab === "categories"
+                                    ? "bg-richblack-900 text-white border-b-2 border-yellow-50"
+                                    : "text-richblack-300 hover:text-white hover:bg-richblack-700"
+                            }`}
+                        >
+                            📁 Categories
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Tab Content */}
+            {activeTab === "dashboard" && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{/* Stats Cards */}
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div className="bg-richblack-800 p-6 rounded-lg border border-richblack-700">
@@ -225,7 +256,13 @@ const AdminDashboard = () => {
                         )}
                     </div>
                 </div>
-            </div>
+                </div>
+            )}
+
+            {/* Categories Tab */}
+            {activeTab === "categories" && (
+                <CategoryManagementDashboard />
+            )}
         </div>
     );
 };

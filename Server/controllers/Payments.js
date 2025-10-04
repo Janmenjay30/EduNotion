@@ -4,6 +4,7 @@ const User=require("../models/User");
 const mailSender=require("../utils/mailSender");
 const {courseEnrollmentEmail}=require("../mail/templates/courseEnrollmentEmail")
 const mongoose=require("mongoose");
+const crypto=require("crypto");
 
 
 // capture the payment and initiate the razorpat order
@@ -15,8 +16,8 @@ exports.capturePayments= async(req,res)=>{
     // validation 
     // valid course id
     if(!course_id){
-        return res.status.json({
-            success:true,
+        return res.status(400).json({
+            success:false,
             message:"Please Provide valid course ID ",
         })
 
@@ -78,7 +79,7 @@ exports.capturePayments= async(req,res)=>{
             thumbnail:course.thumbnail,
             orderId:paymentResponse.id,
             currency:paymentResponse.currency,
-            amount:paymentResponse.first_payment_min_amount,
+            amount:paymentResponse.amount,
         })
     }catch(error){
         console.log(error);
@@ -97,22 +98,37 @@ exports.capturePayments= async(req,res)=>{
 exports.verifySignature=async (req,res)=>{
     const webhooksecret="12345678";
 
-    const signature=req.headers("x-razorpay-signature");
+    // Check if this is a webhook call or direct API call
+    let signature, orderId, paymentId, courseId;
+
+    if (req.body.payload && req.body.payload.payment) {
+        // Webhook format
+        signature = req.headers["x-razorpay-signature"];
+        const {courseId: cid, userId}=req.body.payload.payment.entity.notes;
+        courseId = cid;
+        orderId = req.body.payload.payment.entity.order_id;
+        paymentId = req.body.payload.payment.entity.id;
+    } else {
+        // Direct API call format
+        signature = req.body.razorpay_signature;
+        orderId = req.body.razorpay_order_id;
+        paymentId = req.body.razorpay_payment_id;
+        courseId = req.body.courses ? req.body.courses[0] : req.body.courseId;
+    }
+
+    const userId = req.user ? req.user.id : null; // For direct API calls
 
     const shasum= crypto.createHmac("sha256",webhooksecret);
     shasum.update(JSON.stringify(req.body));
     const digest=shasum.digest("hex");
 
     if(signature==digest){
-        console.log("Payment is authorissed");
-
-        const {courseId,userId}=req.body.payload.payment.entity.notes;
+        console.log("Payment is authorised");
 
         try{
             // find the course and enroll the student in it
-
             const enrolledCourse=await Course.findOneAndUpdate(
-                                                {id:courseId},
+                                                {_id:courseId},
                                                 {$push:{studentsEnrolled:userId}},
                                                 {new:true},
             );
@@ -123,11 +139,10 @@ exports.verifySignature=async (req,res)=>{
                 });
 
             }
-            
+
             console.log(enrolledCourse);
 
             // find the student and add the course in enrolled course
-
             const enrolledStudent= await User.findOneAndUpdate(
                                                 {_id:userId},
                                                 {$push:{courses:courseId}},
@@ -138,7 +153,8 @@ exports.verifySignature=async (req,res)=>{
             // mail send karo confirmation ki
             const emailResponse=await mailSender(
                                 enrolledStudent.email,
-                                "Congratualation you are successfully enrolled into a new course"
+                                "Congratulations, you are successfully enrolled into a new course",
+                                courseEnrollmentEmail(enrolledCourse.courseName, enrolledStudent.firstName)
             );
             console.log(emailResponse);
             return res.status(200).json({
@@ -156,7 +172,7 @@ exports.verifySignature=async (req,res)=>{
     }
     else{
         return res.status(400).json({
-            success:true,
+            success:false,
             message:"invalid request",
         })
     }

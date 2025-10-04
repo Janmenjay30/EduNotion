@@ -25,6 +25,11 @@ import MyCourses from "./components/core/Dashboard/MyCourses.jsx";
 import EditCourse from "./components/core/Dashboard/EditCourse/index.jsx";
 import AdminDashboard from "./components/core/Dashboard/AdminDashBoard/AdminDashboard.jsx";
 import AdminLogin from "./components/core/auth/AdminLogin.jsx";
+import Catalog from "./pages/Catalog.jsx";
+import CourseDetails from "./pages/CourseDetails.jsx";
+import ViewCourse from "./pages/ViewCourse.jsx";
+import NewEnrolledCourses from "./pages/EnrolledCourses.jsx";
+import Payment from "./pages/Payment.jsx";
 
 
 function App() {
@@ -110,20 +115,43 @@ function App() {
               <Route path="dashboard/enrolled-courses" element={<EnrolledCourses />} />
               </>
             )
-      }
-      {
+          }
+
+          {
             user?.accountType === ACCOUNT_TYPE.INSTRUCTOR && (
               <>
               <Route path="dashboard/add-course" element={<AddCourses />} />
               <Route path="dashboard/my-courses" element={<MyCourses/> }/>
               <Route path="dashboard/edit-course/:courseId" element={<EditCourse/> }/>
-              
               </>
             )
-      }
-
-
+          }
         </Route>
+
+        {/* Public course discovery routes */}
+        <Route path="/catalog" element={<Catalog />} />
+        <Route path="/courses/:courseId" element={<CourseDetails />} />
+        <Route path="/payment/:courseId" element={<Payment />} />
+        
+        {/* Student enrolled courses page */}
+        <Route 
+          path="/enrolled-courses" 
+          element={
+            <PrivateRoute>
+              <NewEnrolledCourses />
+            </PrivateRoute>
+          } 
+        />
+        
+        {/* Course viewing route - only for enrolled students */}
+        <Route 
+          path="/view-course/:courseId" 
+          element={
+            <PrivateRoute>
+              <ViewCourse />
+            </PrivateRoute>
+          } 
+        />
 
 
         <Route path="*" element={<Error/>} />

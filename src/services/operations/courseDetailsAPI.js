@@ -159,13 +159,18 @@ export const createSubSection = async (data, token) => {
   let result = null
   const toastId = toast.loading("Loading...")
   try {
-    // console.log("line 159");
-    // console.log("token is ",token);
+    console.log("🚀 Creating subsection with data:", data);
+    // Log FormData contents for debugging
+    if (data instanceof FormData) {
+      console.log("📋 FormData contents:");
+      for (let [key, value] of data.entries()) {
+        console.log(`${key}:`, value);
+      }
+    }
+    
     const response = await apiConnector("POST", CREATE_SUBSECTION_API, data, {
       Authorization: `Bearer ${token}`,
-      
     })
-    console.log("response",response);
     console.log("CREATE SUB-SECTION API RESPONSE............", response)
     if (!response?.data?.success) {
       throw new Error("Could Not Add Lecture")

@@ -11,9 +11,12 @@ export const apiConnector = (method, url, bodyData, headers, params) => {
                   ?.split('=')[1];
 
   // Default headers
-  const defaultHeaders = {
-    'Content-Type': 'application/json'
-  };
+  const defaultHeaders = {};
+
+  // Only set Content-Type for non-FormData requests
+  if (!(bodyData instanceof FormData)) {
+    defaultHeaders['Content-Type'] = 'application/json';
+  }
 
   // Add Authorization header if token exists
   if (token) {
@@ -27,6 +30,7 @@ export const apiConnector = (method, url, bodyData, headers, params) => {
   console.log("URL:", url);
   console.log("Method:", method);
   console.log("Token:", token ? "✅ Present" : "❌ Missing");
+  console.log("Is FormData:", bodyData instanceof FormData);
   console.log("Headers:", finalHeaders);
 
   return axiosInstance({

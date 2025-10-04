@@ -165,9 +165,9 @@ const Home = () => {
                         <div className="h-[150px]"></div>
                         <div className="flex flex-row gap-7 text-white">
                             <CTAButton
-                                active={true} linkto={"/signup"}>
+                                active={true} linkto={"/catalog"}>
                                 <div className="flex items-center gap-3">
-                                    Explore All catalog
+                                    Explore Full Catalog
                                     <FaArrowRight />
                                 </div>
                             </CTAButton>
